@@ -14,7 +14,7 @@ matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 from algorithms import GeneralCausal,  ParallelCausal, SuccessiveRejects,AlphaUCB,RandomArm,ThompsonSampling
 import cPickle as pickle
-import shelve
+import os
 
 print "LOADING EXPERIMENT CONFIG MODULE AGAIN"
 
@@ -33,7 +33,12 @@ class Experiment(object):
         self.markers=['s', 'o', 'D', '*',"^","p"]
         self.colors = ["red","green","blue","purple","cyan","orange"]
         self.algorithms = [ParallelCausal,GeneralCausal,SuccessiveRejects,AlphaUCB,RandomArm,ThompsonSampling]
-
+        
+        try:
+            os.makedirs("results")
+        except OSError:
+            if not os.path.isdir("results"):
+                raise
         for indx,a in enumerate(self.algorithms):
             a.marker = self.markers[indx]
             a.color = self.colors[indx]
@@ -83,28 +88,7 @@ class Experiment(object):
             tpl = pickle.load(f)
         return tpl
         
-    def log_state(self,object_to_value_dict):
-        self.state_filename = "results/experiment_state{0}_{1}.shelve".format(self.experiment_id,self.started)
-        db = shelve.open(self.state_filename)
-        for key,value in object_to_value_dict.iteritems():
-            try:
-                db[key] = value
-            except TypeError:
-                print "failed to write, {0} -> {1}".format(key,value)
-        db.close()
-            
-              
-    def read_state(self,filename):
-        d = {}
-        db = shelve.open(filename)
-        for key in db:
-            try:
-                value = db[key]
-                d[key] = value
-            except AttributeError:
-                print "unable to load value for {0}".format(key)
-        db.close()
-        return d
+   
         
 
                 
